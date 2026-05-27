@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: twilio-token-server
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: TWILIO_ACCOUNT_SID
+        sync: false        # enter in Render Dashboard
+      - key: TWILIO_API_KEY_SID
+        sync: false
+      - key: TWILIO_API_KEY_SECRET
+        sync: false
+      - key: TWILIO_TWIML_APP_SID
+        sync: false        # optional — required for voice calls
+      - key: TWILIO_CALLER_ID
+        sync: false        # optional — your Twilio phone number for outbound calls
+      - key: TOKEN_TTL
+        value: "3600"
+      - key: NODE_ENV
+        value: production
+
