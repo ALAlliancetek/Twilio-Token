@@ -103,23 +103,41 @@ app.all('/token', (req, res) => {
 // ── Voice TwiML handler ───────────────────────────────────────────────────────
 // Called by Twilio when an outgoing call is placed.
 // Set TwiML App → Voice URL to: https://<your-render-app>.onrender.com/voice
+//
+// Handles BOTH GET and POST — Twilio console lets you choose either method.
+// If you get HTTP 404, make sure the TwiML App Voice URL points here.
 
-app.post('/voice', (req, res) => {
-  const to   = req.body.To   || '';
-  const from = req.body.From || 'unknown';
+app.all('/voice', (req, res) => {
+  // Twilio sends params in body (POST) or query string (GET)
+  const params = { ...req.query, ...req.body };
+  const to   = params.To   || params.to   || '';
+  const from = params.From || params.from || params.Caller || 'unknown';
 
-  console.log(`[${new Date().toISOString()}] TWIML | from=${from} to=${to}`);
+  console.log(`[${new Date().toISOString()}] TWIML | method=${req.method} from=${from} to=${to}`);
   res.set('Content-Type', 'text/xml');
 
-  if (!to) return res.send('<Response><Hangup/></Response>');
+  if (!to) {
+    // No "To" param — allow inbound to ring through to the client identity
+    // This handles the case where Twilio calls the webhook without a To field
+    const callerIdentity = (from || '').replace('client:', '');
+    return res.send(
+      `<Response><Say>Connecting your call.</Say></Response>`
+    );
+  }
 
   // Phone number → dial directly
   if (to.startsWith('+') || to.startsWith('00')) {
-    return res.send(`<Response><Dial callerId="${TWILIO_CALLER_ID || to}"><Number>${to}</Number></Dial></Response>`);
+    const callerId = TWILIO_CALLER_ID || from;
+    return res.send(
+      `<Response><Dial callerId="${callerId}"><Number>${to}</Number></Dial></Response>`
+    );
   }
 
-  // Twilio Client identity → dial client
-  return res.send(`<Response><Dial><Client>${to}</Client></Dial></Response>`);
+  // Twilio Client identity → dial client app
+  const clientId = to.replace('client:', '');
+  return res.send(
+    `<Response><Dial><Client>${clientId}</Client></Dial></Response>`
+  );
 });
 
 // ── 404 ──────────────────────────────────────────────────────────────────────

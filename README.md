@@ -82,12 +82,44 @@ Replace `twilio-token-server` with your actual Render service name.
 ## Step 5 — Set TwiML App Voice URL in Twilio Console
 
 1. Go to [Twilio Console → Voice → TwiML Apps](https://console.twilio.com/us1/develop/voice/manage/twiml-apps)
-2. Open your TwiML App
+2. Open your TwiML App (the one whose SID is in `TWILIO_TWIML_APP_SID`)
 3. Set **Voice Configuration → Request URL** to:
    ```
-   https://twilio-token-server.onrender.com/voice
+   https://twilio-token-v0ej.onrender.com/voice
    ```
-4. Save
+   *(Replace with your actual Render URL)*
+4. Set **HTTP Method** to **HTTP POST** (recommended, but the server now handles both GET and POST)
+5. Click **Save**
+
+> ⚠️ **Common cause of HTTP 404 error on `/voice`:**
+> The TwiML App Voice URL was pointing to an old or wrong URL (e.g., a tunnel URL like `loca.lt`).
+> Always point it to your current Render URL + `/voice`.
+
+---
+
+## Troubleshooting — "Got HTTP 404 response to .../voice"
+
+This Twilio console error means Twilio called your server's `/voice` webhook but got a 404.
+
+**Checklist:**
+
+| # | Check | How to fix |
+|---|-------|-----------|
+| 1 | TwiML App Voice URL is set? | Console → Voice → TwiML Apps → open your app → set Voice URL |
+| 2 | URL ends with `/voice`? | Must be `https://yourapp.onrender.com/voice` |
+| 3 | Render deployed latest code? | Render Dashboard → Manual Deploy → Deploy latest commit |
+| 4 | Server is running? | Visit `https://yourapp.onrender.com/health` in browser |
+| 5 | `TWILIO_TWIML_APP_SID` set in Render env? | Render → Environment → check `TWILIO_TWIML_APP_SID=AP...` |
+
+**Quick test — call `/voice` manually:**
+```bash
+curl -X POST "https://twilio-token-v0ej.onrender.com/voice" \
+  -d "To=flutter-tester-2&From=flutter-tester-1"
+```
+Expected response (TwiML XML):
+```xml
+<Response><Dial><Client>flutter-tester-2</Client></Dial></Response>
+```
 
 ---
 
