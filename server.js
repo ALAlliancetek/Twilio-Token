@@ -38,6 +38,7 @@ const {
   TWILIO_API_KEY_SID,
   TWILIO_API_KEY_SECRET,
   TWILIO_TWIML_APP_SID,
+  TWILIO_PUSH_CREDENTIAL_SID,   // ← FCM Push Credential SID (CR...)
   TWILIO_CALLER_ID,
   PORT = 3000,
   TOKEN_TTL = 3600,
@@ -86,8 +87,13 @@ app.all('/token', (req, res) => {
       token.addGrant(new VoiceGrant({
         outgoingApplicationSid: TWILIO_TWIML_APP_SID || undefined,
         incomingAllow: true,
+        // CRITICAL: pushCredentialSid tells Twilio which FCM credential to use
+        // to send push notifications to this device for incoming calls.
+        // Must be set to the FCM Push Credential SID (CR...) from Twilio Console.
+        pushCredentialSid: TWILIO_PUSH_CREDENTIAL_SID || undefined,
       }));
-      console.log(`[${new Date().toISOString()}] VOICE | identity=${identity}`);
+      console.log(`[${new Date().toISOString()}] VOICE | identity=${identity} pushCred=${TWILIO_PUSH_CREDENTIAL_SID ? 'set' : '⚠️  NOT SET — incoming calls will fail!'}`);
+
 
     } else {
       return res.status(400).json({ error: `Unknown type "${type}". Use "video" or "voice".` });
@@ -156,6 +162,7 @@ app.listen(PORT, () => {
   console.log(`   Voice TwiML: http://localhost:${PORT}/voice`);
   console.log(`\n   Render URL:  https://<your-app-name>.onrender.com`);
   console.log(`   Account SID: ${TWILIO_ACCOUNT_SID}`);
-  console.log(`   TwiML App:   ${TWILIO_TWIML_APP_SID || '(not set)'}\n`);
+  console.log(`   TwiML App:   ${TWILIO_TWIML_APP_SID || '⚠️  NOT SET — voice calls will fail'}`);
+  console.log(`   Push Cred:   ${TWILIO_PUSH_CREDENTIAL_SID || '⚠️  NOT SET — incoming calls will fail'}\n`);
 });
 

@@ -58,9 +58,21 @@ In Render Dashboard → your service → **Environment** → Add:
 | `TWILIO_ACCOUNT_SID` | `ACxxxxxxxxxxxxxxxx` | ✅ |
 | `TWILIO_API_KEY_SID` | `SKxxxxxxxxxxxxxxxx` | ✅ |
 | `TWILIO_API_KEY_SECRET` | `your_secret` | ✅ |
-| `TWILIO_TWIML_APP_SID` | `APxxxxxxxxxxxxxxxx` | ✅ for voice |
+| `TWILIO_TWIML_APP_SID` | `APxxxxxxxxxxxxxxxx` | ✅ for voice outgoing |
+| `TWILIO_PUSH_CREDENTIAL_SID` | `CRxxxxxxxxxxxxxxxx` | ✅ for voice incoming |
 | `TWILIO_CALLER_ID` | `+1xxxxxxxxxx` | optional |
 | `TOKEN_TTL` | `3600` | optional |
+
+> ⚠️ `TWILIO_PUSH_CREDENTIAL_SID` is **required for incoming calls**.
+> Without it Twilio cannot send FCM push notifications to the receiver.
+>
+> **Where to find it:**
+> Twilio Console → Voice → Push Credentials → copy the SID starting with `CR...`
+>
+> **How to create one (if you haven't):**
+> 1. Console → Voice → Push Credentials → Create new credential
+> 2. Type: FCM, paste your Firebase Server Key (from Firebase Console → Project Settings → Cloud Messaging)
+> 3. Copy the generated `CR...` SID → paste as `TWILIO_PUSH_CREDENTIAL_SID`
 
 > ⚠️ **Never** put secrets in `.env` files committed to Git.
 > Always use Render's Environment dashboard for production values.
