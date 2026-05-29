@@ -123,26 +123,32 @@ app.all('/voice', (req, res) => {
   res.set('Content-Type', 'text/xml');
 
   if (!to) {
-    // No "To" param — allow inbound to ring through to the client identity
-    // This handles the case where Twilio calls the webhook without a To field
-    const callerIdentity = (from || '').replace('client:', '');
-    return res.send(
-      `<Response><Say>Connecting your call.</Say></Response>`
-    );
+    // No "To" param — just acknowledge
+    return res.send(`<Response><Say>No destination specified.</Say><Hangup/></Response>`);
   }
 
   // Phone number → dial directly
   if (to.startsWith('+') || to.startsWith('00')) {
     const callerId = TWILIO_CALLER_ID || from;
     return res.send(
-      `<Response><Dial callerId="${callerId}"><Number>${to}</Number></Dial></Response>`
+      `<Response>` +
+      `<Dial callerId="${callerId}" timeout="30" answerOnBridge="true">` +
+      `<Number>${to}</Number>` +
+      `</Dial>` +
+      `</Response>`
     );
   }
 
   // Twilio Client identity → dial client app
+  // answerOnBridge="true"  → caller hears ringing until receiver picks up
+  // timeout="30"           → ring for 30 seconds before giving up
   const clientId = to.replace('client:', '');
   return res.send(
-    `<Response><Dial><Client>${clientId}</Client></Dial></Response>`
+    `<Response>` +
+    `<Dial answerOnBridge="true" timeout="30">` +
+    `<Client>${clientId}</Client>` +
+    `</Dial>` +
+    `</Response>`
   );
 });
 
