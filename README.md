@@ -97,9 +97,9 @@ Replace `twilio-token-server` with your actual Render service name.
 2. Open your TwiML App (the one whose SID is in `TWILIO_TWIML_APP_SID`)
 3. Set **Voice Configuration → Request URL** to:
    ```
-   https://twilio-token-v0ej.onrender.com/voice
+   https://your-server-name.onrender.com/voice
    ```
-   *(Replace with your actual Render URL)*
+   *(Replace `your-server-name` with your actual Render service name)*
 4. Set **HTTP Method** to **HTTP POST** (recommended, but the server now handles both GET and POST)
 5. Click **Save**
 
@@ -125,7 +125,7 @@ This Twilio console error means Twilio called your server's `/voice` webhook but
 
 **Quick test — call `/voice` manually:**
 ```bash
-curl -X POST "https://twilio-token-v0ej.onrender.com/voice" \
+curl -X POST "https://your-server-name.onrender.com/voice" \
   -d "To=flutter-tester-2&From=flutter-tester-1"
 ```
 Expected response (TwiML XML):
